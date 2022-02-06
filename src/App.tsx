@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   List,
   AutoSizer,
@@ -15,6 +15,12 @@ interface IPeople {
 }
 
 function App() {
+  const cache = useRef(
+    new CellMeasurerCache({
+      fixedWidth: true,
+      defaultHeight: 100
+    })
+  );
   const [people, setPeople] = useState<IPeople[]>([]);
   const [time, setTime] = useState(new Date());
 
@@ -45,32 +51,59 @@ function App() {
   }, []);
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexFlow: 'column', height: '100%' }}>
       <h1>{time.toISOString()}</h1>
 
-      <List
-        width={600}
-        height={600}
-        rowHeight={50}
-        rowCount={people.length}
-        rowRenderer={({ key, index, style, parent }) => {
-          const person = people[index];
-
-          return (
-            <div key={key} style={style}>
-              <h2>{person.name}</h2>
-            </div>
-          );
+      <div
+        style={{
+          width: '100%',
+          flex: 1,
+          padding: '0.2rem 0.2rem',
+          borderTop: '1px solid lightgray'
         }}
-      />
+      >
+        <AutoSizer>
+          {({ width, height }) => (
+            <List
+              width={width}
+              height={height}
+              rowHeight={cache.current.rowHeight}
+              deferredMeasurementCache={cache.current}
+              rowCount={people.length}
+              rowRenderer={({ key, index, style, parent }) => {
+                const person = people[index];
 
-      {/* <ul>
-        {people.map((person) => (
-          <li key={person.id}>
-            <h2>{person.name}</h2>
-          </li>
-        ))}
-      </ul> */}
+                return (
+                  <CellMeasurer
+                    key={key}
+                    cache={cache.current}
+                    parent={parent}
+                    columnIndex={0}
+                    rowIndex={index}
+                  >
+                    <div style={style}>
+                      <h2>{person.name}</h2>
+                      <p>{person.bio}</p>
+                    </div>
+                  </CellMeasurer>
+                );
+              }}
+            />
+          )}
+        </AutoSizer>
+      </div>
+
+      <div
+        style={{
+          height: '10rem',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          borderTop: '1px solid lightgray'
+        }}
+      >
+        bottom area
+      </div>
     </div>
   );
 }
