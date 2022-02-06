@@ -6,6 +6,7 @@ import {
   CellMeasurerCache
 } from 'react-virtualized';
 import faker from 'faker';
+import chalk from 'chalk';
 
 interface IPeople {
   id: number;
@@ -31,7 +32,13 @@ function App() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTime(new Date());
+      const date = new Date();
+
+      console.log(`
+        ${chalk.red('timer tik')}: ${chalk.blackBright.bgBlueBright(
+        date.toISOString()
+      )}`);
+      setTime(date);
     }, 1000);
 
     return () => clearInterval(interval);
