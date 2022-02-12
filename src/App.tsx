@@ -25,6 +25,23 @@ function App() {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
+    window.addEventListener('resize', () => updateRowHeight());
+
+    return () => window.removeEventListener('resize', updateRowHeight);
+  }, []);
+
+  // 첫 로드이후 창사이즈를 조절시 글자라던지 html 레이아웃이 깨지는 현상을 없애기 위해
+  // cache clear 를 하여 row height 를 재 조절하게 함
+  const updateRowHeight = () => {
+    if (!cache) {
+      return;
+    }
+    console.log('recompute');
+
+    cache.current.clearAll();
+  };
+
+  useEffect(() => {
     setPeople(
       [...Array(10000).keys()].map((key) => {
         return {
